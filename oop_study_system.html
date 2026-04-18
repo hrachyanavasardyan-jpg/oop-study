@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS120 OOP Java — Study Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --border: #2a2f3f;
+    --accent: #5ee7c8;
+    --accent2: #f7b84b;
+    --accent3: #e06c75;
+    --text: #cdd6f4;
+    --muted: #6c7086;
+    --code-bg: #0a0c10;
+    --good: #a6e3a1;
+    --bad: #f38ba8;
+    --warn: #fab387;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-header {
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .sidebar-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: white;
+    line-height: 1.2;
+  }
+
+  .sidebar-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .sidebar-nav { padding: 12px 0; flex: 1; }
+
+  .nav-section-title {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 8px 20px 4px;
+    font-weight: 700;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s ease;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+
+  .nav-item.active {
+    border-left-color: var(--accent);
+    color: var(--accent);
+    background: rgba(94, 231, 200, 0.07);
+  }
+
+  .nav-icon { font-size: 16px; min-width: 20px; text-align: center; }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* MAIN */
+  #main {
+    margin-left: 280px;
+    flex: 1;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .tab-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tab-btn.active { background: var(--accent); color: #0d0f14; border-color: var(--accent); }
+
+  .content { padding: 40px; max-width: 920px; }
+
+  /* TOPIC PAGE */
+  .page { display: none; animation: fadeIn 0.25s ease; }
+  .page.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .topic-header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .topic-tag {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .topic-title {
+    font-size: 38px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .topic-desc {
+    margin-top: 12px;
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 640px;
+  }
+
+  /* SECTIONS */
+  .section { margin-bottom: 28px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .section-header:hover { background: #222638; }
+
+  .section-header.collapsed { border-radius: 10px; border-bottom-color: var(--border); }
+
+  .section-icon { font-size: 18px; }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: white;
+    flex: 1;
+  }
+
+  .section-chevron {
+    color: var(--muted);
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+
+  .section-header.collapsed .section-chevron { transform: rotate(-90deg); }
+
+  .section-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 22px;
+    overflow: hidden;
+  }
+
+  .section-body.hidden { display: none; }
+
+  p { line-height: 1.75; font-size: 14px; color: var(--text); margin-bottom: 12px; }
+  p:last-child { margin-bottom: 0; }
+
+  strong { color: white; font-weight: 700; }
+
+  .analogy-box {
+    background: rgba(247, 184, 75, 0.07);
+    border: 1px solid rgba(247, 184, 75, 0.25);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 14px 0;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .analogy-box .label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent2);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* CODE BLOCKS */
+  .code-container { margin: 14px 0; }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 8px 14px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .code-label { color: var(--accent); font-weight: 700; }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 2px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    font-family: 'Syne', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    padding: 18px;
+    overflow-x: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+
+  .code-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 14px 0;
+  }
+
+  .code-bad .code-label { color: var(--bad); }
+  .code-good .code-label { color: var(--good); }
+
+  /* SYNTAX HIGHLIGHTING */
+  .kw { color: #c792ea; font-weight: 700; }
+  .cm { color: #4a5568; font-style: italic; }
+  .str { color: #c3e88d; }
+  .num { color: #f78c6c; }
+  .cls { color: #ffcb6b; font-weight: 700; }
+  .fn { color: #82aaff; }
+  .ann { color: #89ddff; }
+
+  /* PITFALLS */
+  .pitfall {
+    background: rgba(224, 108, 117, 0.07);
+    border: 1px solid rgba(224, 108, 117, 0.25);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 12px 0;
+  }
+
+  .pitfall-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--bad);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .pitfall p { font-size: 13px; color: #c7bfca; margin-bottom: 6px; }
+
+  .tip-box {
+    background: rgba(166, 227, 161, 0.07);
+    border: 1px solid rgba(166, 227, 161, 0.25);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--good);
+  }
+
+  /* STEP LIST */
+  .step-list { counter-reset: step; list-style: none; margin: 10px 0; }
+
+  .step-list li {
+    counter-increment: step;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
+  .step-list li::before {
+    content: counter(step);
+    background: var(--accent);
+    color: #0d0f14;
+    font-weight: 700;
+    font-size: 11px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 10px;
+  }
+
+  .cheat-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .cheat-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cheat-item {
+    font-size: 12px;
+    color: var(--text);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.5;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .cheat-item:last-child { border-bottom: none; }
+  .cheat-item span { color: var(--muted); font-family: 'Syne', sans-serif; font-size: 11px; display: block; }
+
+  /* INLINE CODE */
+  code {
+    font-family: 'Space Mono', monospace;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  ul { margin: 8px 0 8px 18px; }
+  ul li { font-size: 14px; line-height: 1.7; color: var(--text); margin-bottom: 4px; }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent); border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* MOBILE TOGGLE */
+  #menu-toggle {
+    display: none;
+    position: fixed;
+    top: 12px; left: 12px;
+    z-index: 200;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  @media (max-width: 768px) {
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    #main { margin-left: 0; }
+    #menu-toggle { display: block; }
+    .content { padding: 24px 16px; }
+    .code-compare { grid-template-columns: 1fr; }
+    .cheat-grid { grid-template-columns: 1fr; }
+    .topic-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">CS120 · Spring 2026</div>
+    <div class="sidebar-title">OOP Java<br>Study Dashboard</div>
+    <div class="sidebar-subtitle">AUA · Prof. Monika Stepanyan</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:14%"></div></div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-title">Core Topics</div>
+    <div class="nav-item active" onclick="showPage('enums', this)"><span class="nav-icon">🔢</span> Enums & For-Each</div>
+    <div class="nav-item" onclick="showPage('classes', this)"><span class="nav-icon">🏗️</span> Classes & Objects</div>
+    <div class="nav-item" onclick="showPage('encapsulation', this)"><span class="nav-icon">🔒</span> Encapsulation</div>
+    <div class="nav-item" onclick="showPage('inheritance', this)"><span class="nav-icon">🧬</span> Inheritance</div>
+    <div class="nav-item" onclick="showPage('polymorphism', this)"><span class="nav-icon">🎭</span> Polymorphism</div>
+    <div class="nav-item" onclick="showPage('abstraction', this)"><span class="nav-icon">🌫️</span> Abstract Classes</div>
+    <div class="nav-item" onclick="showPage('interfaces', this)"><span class="nav-icon">🔌</span> Interfaces</div>
+    <div class="nav-item" onclick="showPage('cloneable', this)"><span class="nav-icon">📋</span> Cloneable & Comparable</div>
+    <div class="nav-section-title">Quick Tools</div>
+    <div class="nav-item" onclick="showPage('cheatsheet', this)"><span class="nav-icon">⚡</span> Cheat Sheet</div>
+  </div>
+  <div class="sidebar-footer">
+    Click any section header to expand / collapse
+  </div>
+</nav>
+
+<main id="main">
+  <div class="topbar">
+    <button class="tab-btn active" onclick="setTab('theory', this)">Theory</button>
+    <button class="tab-btn" onclick="setTab('code', this)">Code</button>
+    <button class="tab-btn" onclick="setTab('pitfalls', this)">⚠️ Pitfalls</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ==================== ENUMS ==================== -->
+    <div id="page-enums" class="page active">
+      <div class="topic-header">
+        <div class="topic-tag">Topic 01</div>
+        <div class="topic-title">Enums &amp; For-Each Loops</div>
+        <div class="topic-desc">Enumerated types give names to fixed sets of values. For-each loops make iterating over arrays and collections cleaner and safer.</div>
+      </div>
+
+      <div class="tab-content theory-content">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">💡</span>
+            <span class="section-title">Simple Explanation</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p>An <strong>enum</strong> (enumerated type) is like a list of named constants — a fixed set of values that a variable can hold. Instead of using magic numbers like <code>1</code> for Monday, you use <code>WorkDay.MONDAY</code>.</p>
+            <p>The <strong>for-each loop</strong> (enhanced for loop) lets you loop through every element in an array or collection without managing an index variable — cleaner, less error-prone.</p>
+            <div class="analogy-box">
+              <div class="label">🌍 Real-World Analogy</div>
+              <strong>Enum = Traffic light colours.</strong> A traffic light can only ever be RED, YELLOW, or GREEN. You wouldn't use random numbers to represent that — you'd use named constants. That's an enum.<br><br>
+              <strong>For-each = Reading every page of a book.</strong> You don't say "read page 0, read page 1, read page 2…" — you just say "for every page, read it."
+            </div>
+            <p>Enums in Java are actually <strong>classes</strong>. That means they can have instance variables, constructors, and methods — making them very powerful.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">☕</span>
+            <span class="section-title">What Happens in Java</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <ul>
+              <li>Declared with <code>enum Name { VALUE1, VALUE2, ... }</code></li>
+              <li>Each value is automatically an <code>int</code> ordinal starting from 0</li>
+              <li>Auto-provided methods: <code>ordinal()</code>, <code>name()</code>, <code>values()</code>, <code>valueOf()</code>, <code>compareTo()</code>, <code>equals()</code></li>
+              <li>Can have a private instance variable + constructor to store extra data</li>
+              <li>For-each syntax: <code>for (Type var : collection) { ... }</code></li>
+              <li>For-each cannot modify array elements (read-only access to element)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content code-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">📝</span>
+            <span class="section-title">Code from Class (Cleaned)</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="code-container">
+              <div class="code-header"><span class="code-label">Month Enum with Index</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="cm">// Enum is a special class — each constant is an instance</span>
+<span class="kw">enum</span> <span class="cls">Month</span> {
+    <span class="ann">JANUARY</span>, <span class="ann">FEBRUARY</span>, <span class="ann">MARCH</span>, <span class="ann">APRIL</span>, <span class="ann">MAY</span>, <span class="ann">JUNE</span>,
+    <span class="ann">JULY</span>, <span class="ann">AUGUST</span>, <span class="ann">SEPTEMBER</span>, <span class="ann">OCTOBER</span>, <span class="ann">NOVEMBER</span>, <span class="ann">DECEMBER</span>;
+
+    <span class="kw">private</span> <span class="cls">String</span> index; <span class="cm">// "01", "02", ..., "12"</span>
+
+    <span class="cm">// Constructor runs once per constant when class loads</span>
+    <span class="cls">Month</span>() {
+        <span class="kw">int</span> val = ordinal() + <span class="num">1</span>; <span class="cm">// ordinal() = 0-based position</span>
+        index = val &lt; <span class="num">10</span> ? <span class="str">"0"</span> + val : <span class="str">""</span> + val;
+    }
+
+    <span class="cm">// Static helper: converts int day to "DD" format</span>
+    <span class="kw">public static</span> <span class="cls">String</span> <span class="fn">intToString</span>(<span class="kw">int</span> v) {
+        <span class="kw">return</span> v &lt; <span class="num">10</span> ? <span class="str">"0"</span> + v : <span class="str">""</span> + v;
+    }
+}
+
+<span class="cm">// Usage: convert Date to MM/DD/YYYY format</span>
+<span class="cls">Date</span> date1 = <span class="kw">new</span> <span class="cls">Date</span>(<span class="str">"May"</span>, <span class="num">8</span>, <span class="num">1975</span>);
+<span class="cls">String</span> mm = <span class="cls">Month</span>.<span class="fn">valueOf</span>(date1.<span class="fn">getMonth</span>().<span class="fn">toUpperCase</span>()).index;
+<span class="cls">String</span> dd = <span class="cls">Month</span>.<span class="fn">intToString</span>(date1.<span class="fn">getDay</span>());
+<span class="cls">System</span>.out.<span class="fn">println</span>(mm + <span class="str">"/"</span> + dd + <span class="str">"/"</span> + date1.<span class="fn">getYear</span>());
+<span class="cm">// Output: 05/08/1975</span>
+
+<span class="cm">// For-each vs regular loop — both do the same thing</span>
+<span class="kw">double</span>[] a = {<span class="num">1.5</span>, <span class="num">2.0</span>, <span class="num">3.5</span>};
+
+<span class="cm">// Old way:</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; a.length; i++)
+    <span class="cls">System</span>.out.<span class="fn">println</span>(a[i]);
+
+<span class="cm">// For-each (cleaner, preferred):</span>
+<span class="kw">for</span> (<span class="kw">double</span> element : a)
+    <span class="cls">System</span>.out.<span class="fn">println</span>(element);</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">🔢</span>
+            <span class="section-title">Step-by-Step Code Flow</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <ol class="step-list">
+              <li>JVM loads the <code>Month</code> enum class and <strong>creates 12 objects</strong> — one per constant.</li>
+              <li>For each object, the constructor runs: <code>ordinal()</code> returns 0 for JANUARY, 1 for FEBRUARY, etc.</li>
+              <li><code>val = ordinal() + 1</code> shifts the index to 1–12. The ternary pads single digits with a leading zero.</li>
+              <li><code>Month.valueOf("MAY")</code> looks up the constant named "MAY" and returns it.</li>
+              <li>We access its <code>.index</code> field → <code>"05"</code>.</li>
+              <li><code>intToString(8)</code> returns <code>"08"</code>. String concatenation builds <code>"05/08/1975"</code>.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content pitfalls-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">⚠️</span>
+            <span class="section-title">Common Mistakes</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Using ordinal() as the month number</div>
+              <p><code>Month.JANUARY.ordinal()</code> returns <code>0</code>, not <code>1</code>. Students forget ordinals are 0-based.</p>
+              <div class="tip-box">✅ Always add 1: <code>ordinal() + 1</code> to get the real month number.</div>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Passing lowercase to valueOf()</div>
+              <p><code>Month.valueOf("may")</code> throws <code>IllegalArgumentException</code>. Enum names are case-sensitive.</p>
+              <div class="tip-box">✅ Always call <code>.toUpperCase()</code> first: <code>Month.valueOf(str.toUpperCase())</code></div>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Trying to modify array elements in for-each</div>
+              <p><code>for (int x : arr) { x = 0; }</code> — this does NOT change the array! <code>x</code> is a copy.</p>
+              <div class="tip-box">✅ Use a regular indexed loop if you need to modify: <code>for (int i = 0; i &lt; arr.length; i++) arr[i] = 0;</code></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CLASSES ==================== -->
+    <div id="page-classes" class="page">
+      <div class="topic-header">
+        <div class="topic-tag">Topic 02</div>
+        <div class="topic-title">Classes &amp; Objects</div>
+        <div class="topic-desc">A class is a blueprint. An object is a real thing built from that blueprint. This is the foundation of all OOP.</div>
+      </div>
+
+      <div class="tab-content theory-content">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">💡</span>
+            <span class="section-title">Simple Explanation</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p>A <strong>class</strong> defines what something IS (its data) and what it can DO (its methods). An <strong>object</strong> is a specific instance of a class — built using the <code>new</code> keyword.</p>
+            <div class="analogy-box">
+              <div class="label">🌍 Real-World Analogy</div>
+              <strong>Class = Cookie cutter.</strong> An object = the actual cookie. The cutter (class) defines the shape. Each cookie (object) is a separate thing with its own "dough" (data). You can make a thousand cookies from one cutter — each independent.
+            </div>
+            <p>Every object has its own copy of <strong>instance variables</strong> (the data). Methods are shared — they just operate on whichever object called them using <code>this</code>.</p>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">☕</span>
+            <span class="section-title">Key Java Concepts</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <ul>
+              <li><strong>Constructor</strong>: Special method with the same name as the class. No return type. Called by <code>new</code>.</li>
+              <li><strong>this()</strong>: Calls another constructor in the same class (must be first line)</li>
+              <li><strong>Accessor (getter)</strong>: Returns a private field's value</li>
+              <li><strong>Mutator (setter)</strong>: Changes a private field's value</li>
+              <li><strong>toString()</strong>: Called automatically by <code>System.out.println(obj)</code></li>
+              <li><strong>equals(Object o)</strong>: Override this — never use <code>==</code> to compare objects by value</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content code-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">📝</span>
+            <span class="section-title">Best Practice: Date Class</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="code-container">
+              <div class="code-header"><span class="code-label">Date.java — Clean version from lectures</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="kw">public class</span> <span class="cls">Date</span> {
+
+    <span class="cm">// Private fields — only accessible inside this class</span>
+    <span class="kw">private</span> <span class="cls">String</span> month;
+    <span class="kw">private</span> <span class="kw">int</span> day;
+    <span class="kw">private</span> <span class="kw">int</span> year;
+
+    <span class="cm">// Default constructor — calls the full constructor via this()</span>
+    <span class="kw">public</span> <span class="cls">Date</span>() {
+        <span class="kw">this</span>(<span class="str">"January"</span>, <span class="num">1</span>, <span class="num">0</span>); <span class="cm">// Must be FIRST line</span>
+    }
+
+    <span class="cm">// Full constructor</span>
+    <span class="kw">public</span> <span class="cls">Date</span>(<span class="cls">String</span> month, <span class="kw">int</span> day, <span class="kw">int</span> year) {
+        <span class="kw">this</span>.month = month; <span class="cm">// "this.month" = field; "month" = param</span>
+        <span class="kw">this</span>.day = day;
+        <span class="kw">this</span>.year = year;
+    }
+
+    <span class="cm">// Copy constructor — creates an independent copy</span>
+    <span class="kw">public</span> <span class="cls">Date</span>(<span class="cls">Date</span> that) {
+        <span class="kw">this</span>(that.month, that.day, that.year);
+    }
+
+    <span class="cm">// Getters (accessors)</span>
+    <span class="kw">public</span> <span class="cls">String</span> <span class="fn">getMonth</span>() { <span class="kw">return</span> month; }
+    <span class="kw">public</span> <span class="kw">int</span> <span class="fn">getDay</span>()       { <span class="kw">return</span> day; }
+    <span class="kw">public</span> <span class="kw">int</span> <span class="fn">getYear</span>()      { <span class="kw">return</span> year; }
+
+    <span class="cm">// Setters (mutators)</span>
+    <span class="kw">public void</span> <span class="fn">setMonth</span>(<span class="cls">String</span> month) { <span class="kw">this</span>.month = month; }
+    <span class="kw">public void</span> <span class="fn">setDay</span>(<span class="kw">int</span> day)         { <span class="kw">this</span>.day = day; }
+    <span class="kw">public void</span> <span class="fn">setYear</span>(<span class="kw">int</span> year)       { <span class="kw">this</span>.year = year; }
+
+    <span class="cm">// Returns a NEW Date one year later (doesn't modify this)</span>
+    <span class="kw">public</span> <span class="cls">Date</span> <span class="fn">nextYear</span>() {
+        <span class="kw">return new</span> <span class="cls">Date</span>(month, day, year + <span class="num">1</span>);
+    }
+
+    <span class="cm">// toString — called by System.out.println(date)</span>
+    <span class="kw">public</span> <span class="cls">String</span> <span class="fn">toString</span>() {
+        <span class="kw">return</span> month + <span class="str">" "</span> + day + <span class="str">", "</span> + year;
+    }
+
+    <span class="cm">// equals — compares by VALUE, not memory address</span>
+    <span class="kw">public boolean</span> <span class="fn">equals</span>(<span class="cls">Object</span> object) {
+        <span class="kw">if</span> (<span class="kw">this</span> == object) <span class="kw">return true</span>;   <span class="cm">// same object?</span>
+        <span class="kw">if</span> (object == <span class="kw">null</span>) <span class="kw">return false</span>;  <span class="cm">// null check</span>
+        <span class="kw">if</span> (<span class="kw">this</span>.<span class="fn">getClass</span>() != object.<span class="fn">getClass</span>()) <span class="kw">return false</span>;
+        <span class="cls">Date</span> other = (<span class="cls">Date</span>) object;        <span class="cm">// downcast safely</span>
+        <span class="kw">return</span> day == other.day &amp;&amp; year == other.year
+            &amp;&amp; month.<span class="fn">equals</span>(other.month);
+    }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content pitfalls-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">⚠️</span>
+            <span class="section-title">Common Mistakes</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Using == to compare objects</div>
+              <p><code>date1 == date2</code> checks if they are the <em>same object in memory</em>, not if they have equal values. Always returns <code>false</code> for two separately created objects.</p>
+              <div class="tip-box">✅ Use <code>.equals()</code>: <code>date1.equals(date2)</code></div>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Forgetting this() must be the first line</div>
+              <p>If you call <code>this(...)</code> inside a constructor, it MUST be the very first statement. Putting code before it is a compile error.</p>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ equals() with wrong parameter type</div>
+              <p>Writing <code>public boolean equals(Date other)</code> — this <strong>overloads</strong>, not overrides! The correct signature is <code>equals(Object object)</code>.</p>
+              <div class="tip-box">✅ Always match the Object class signature exactly, then downcast inside.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ENCAPSULATION ==================== -->
+    <div id="page-encapsulation" class="page">
+      <div class="topic-header">
+        <div class="topic-tag">Topic 03</div>
+        <div class="topic-title">Encapsulation</div>
+        <div class="topic-desc">Bundle data + methods together, and hide the internal details. Only expose what's necessary through a clean interface.</div>
+      </div>
+      <div class="tab-content theory-content">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">💡</span>
+            <span class="section-title">Simple Explanation</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p>Encapsulation means: keep your data <code>private</code> and only let the outside world interact with it through controlled methods (getters/setters). This protects your object from invalid states.</p>
+            <div class="analogy-box">
+              <div class="label">🌍 Real-World Analogy</div>
+              <strong>ATM machine.</strong> You don't get to open the machine and grab cash directly. You interact through a controlled interface (PIN, buttons). The bank's internal logic is hidden. You can only do what the machine allows.
+            </div>
+            <p>Access levels in Java (from most to least restrictive): <code>private</code> → package/default → <code>protected</code> → <code>public</code></p>
+            <ul>
+              <li><code>private</code>: Only inside the class itself</li>
+              <li>package (no modifier): Classes in the same package</li>
+              <li><code>protected</code>: Same package + subclasses</li>
+              <li><code>public</code>: Everyone</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content code-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">📝</span>
+            <span class="section-title">Bad vs Good Encapsulation</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="code-compare">
+              <div class="code-bad code-container">
+                <div class="code-header"><span class="code-label">❌ Bad — Public fields</span></div>
+                <pre><span class="kw">class</span> <span class="cls">Date</span> {
+  <span class="cm">// Anyone can change this!</span>
+  <span class="kw">public</span> <span class="cls">String</span> month;
+  <span class="kw">public</span> <span class="kw">int</span> day;
+  <span class="kw">public</span> <span class="kw">int</span> year;
+}
+
+<span class="cm">// Nothing stops invalid data:</span>
+d.day = <span class="num">-99</span>;
+d.month = <span class="str">"Octember"</span>;</pre>
+              </div>
+              <div class="code-good code-container">
+                <div class="code-header"><span class="code-label">✅ Good — Private + getters</span></div>
+                <pre><span class="kw">class</span> <span class="cls">Date</span> {
+  <span class="kw">private</span> <span class="cls">String</span> month;
+  <span class="kw">private</span> <span class="kw">int</span> day;
+
+  <span class="kw">public void</span> <span class="fn">setDay</span>(<span class="kw">int</span> d) {
+    <span class="cm">// Validate before setting!</span>
+    <span class="kw">if</span> (d &gt;= <span class="num">1</span> &amp;&amp; d &lt;= <span class="num">31</span>)
+      day = d;
+  }
+}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content pitfalls-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">⚠️</span>
+            <span class="section-title">Common Mistakes</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Returning mutable objects directly from getters</div>
+              <p>If you have a private <code>Date</code> field and return it directly from a getter, the caller can modify the internal object — a privacy leak!</p>
+              <div class="tip-box">✅ Return a <strong>deep copy</strong>: <code>return new Date(this.hireDate);</code></div>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Confusing protected with private</div>
+              <p>In derived classes, you <strong>cannot</strong> access <code>private</code> fields by name — even through inheritance. You must use the public/protected getters.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== INHERITANCE ==================== -->
+    <div id="page-inheritance" class="page">
+      <div class="topic-header">
+        <div class="topic-tag">Topic 04</div>
+        <div class="topic-title">Inheritance</div>
+        <div class="topic-desc">A derived class automatically gets everything from its base class. Write shared code once, reuse everywhere.</div>
+      </div>
+      <div class="tab-content theory-content">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">💡</span>
+            <span class="section-title">Simple Explanation</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p>Inheritance lets you create a new class (child/derived/subclass) based on an existing class (parent/base/superclass). The child <strong>automatically has</strong> all public/protected fields and methods of the parent.</p>
+            <div class="analogy-box">
+              <div class="label">🌍 Real-World Analogy</div>
+              <strong>Vehicles.</strong> Every vehicle has wheels, a speed, and can move. A Car <em>is a</em> Vehicle but also has doors and a trunk. A Truck <em>is also</em> a Vehicle but with a cargo bed. You define Vehicle once, and Car/Truck inherit all of it automatically.
+            </div>
+            <p>Java uses <code>extends</code> for inheritance. Java only allows <strong>single inheritance</strong> (one parent class), but a class can implement multiple interfaces.</p>
+            <p>The <strong>"is a" relationship</strong>: An object of type <code>FormattedDate</code> is also a <code>Date</code>. You can assign it to a <code>Date</code> variable.</p>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">☕</span>
+            <span class="section-title">Key Rules</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <ul>
+              <li><code>super(...)</code> calls the parent constructor — must be the first line in child constructor</li>
+              <li>If you don't call <code>super()</code>, Java automatically calls the parent's <strong>no-arg constructor</strong> (compile error if it doesn't exist)</li>
+              <li>Private fields of parent are inherited but NOT directly accessible by name in child</li>
+              <li><code>super.methodName()</code> calls the parent's version of an overridden method</li>
+              <li><code>final</code> on a method = cannot be overridden. <code>final</code> on a class = cannot be extended.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content code-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">📝</span>
+            <span class="section-title">FormattedDate extends Date</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="code-container">
+              <div class="code-header"><span class="code-label">FormattedDate.java — Best practice version</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="kw">public class</span> <span class="cls">FormattedDate</span> <span class="kw">extends</span> <span class="cls">Date</span> {
+
+    <span class="cm">// New enum only in FormattedDate (not in Date)</span>
+    <span class="kw">enum</span> <span class="cls">Format</span> { DDMMYYYY, MMDDYYYY, YYYYMMDD }
+
+    <span class="kw">enum</span> <span class="cls">Month</span> {
+        JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE,
+        JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER;
+        <span class="kw">private</span> <span class="cls">String</span> index;
+        <span class="cls">Month</span>() {
+            <span class="kw">int</span> val = ordinal() + <span class="num">1</span>;
+            index = val &lt; <span class="num">10</span> ? <span class="str">"0"</span> + val : <span class="str">""</span> + val;
+        }
+        <span class="kw">public static</span> <span class="cls">String</span> <span class="fn">dayToString</span>(<span class="kw">int</span> val) {
+            <span class="kw">return</span> val &lt; <span class="num">10</span> ? <span class="str">"0"</span> + val : <span class="str">""</span> + val;
+        }
+    }
+
+    <span class="kw">private</span> <span class="cls">Format</span> format; <span class="cm">// NEW field — not in parent</span>
+
+    <span class="cm">// Constructor: call super() first to init inherited fields</span>
+    <span class="kw">public</span> <span class="cls">FormattedDate</span>(<span class="cls">String</span> month, <span class="kw">int</span> day, <span class="kw">int</span> year, <span class="cls">Format</span> format) {
+        <span class="kw">super</span>(month, day, year); <span class="cm">// MUST be first line</span>
+        <span class="kw">this</span>.format = format;
+    }
+
+    <span class="cm">// Convenience constructor — default format</span>
+    <span class="kw">public</span> <span class="cls">FormattedDate</span>(<span class="cls">String</span> month, <span class="kw">int</span> day, <span class="kw">int</span> year) {
+        <span class="kw">this</span>(month, day, year, <span class="cls">Format</span>.YYYYMMDD);
+    }
+
+    <span class="cm">// Default constructor</span>
+    <span class="kw">public</span> <span class="cls">FormattedDate</span>() {
+        <span class="kw">this</span>(<span class="str">"January"</span>, <span class="num">1</span>, <span class="num">0</span>, <span class="cls">Format</span>.YYYYMMDD);
+    }
+
+    <span class="cm">// Static: format any Date with any Format</span>
+    <span class="kw">public static</span> <span class="cls">String</span> <span class="fn">printInfo</span>(<span class="cls">Date</span> date, <span class="cls">Format</span> f) {
+        <span class="cm">// Can't access date.month directly (it's private in Date!)</span>
+        <span class="cm">// Must use public getters: date.getMonth(), date.getDay(), date.getYear()</span>
+        <span class="cls">String</span> mm = <span class="cls">Month</span>.<span class="fn">valueOf</span>(date.<span class="fn">getMonth</span>().<span class="fn">toUpperCase</span>()).index;
+        <span class="cls">String</span> dd = <span class="cls">Month</span>.<span class="fn">dayToString</span>(date.<span class="fn">getDay</span>());
+        <span class="kw">switch</span> (f) {
+            <span class="kw">case</span> DDMMYYYY: <span class="kw">return</span> dd + <span class="str">"/"</span> + mm + <span class="str">"/"</span> + date.<span class="fn">getYear</span>();
+            <span class="kw">case</span> MMDDYYYY: <span class="kw">return</span> mm + <span class="str">"/"</span> + dd + <span class="str">"/"</span> + date.<span class="fn">getYear</span>();
+            <span class="kw">case</span> YYYYMMDD: <span class="kw">return</span> date.<span class="fn">getYear</span>() + <span class="str">"/"</span> + mm + <span class="str">"/"</span> + dd;
+        }
+        <span class="kw">return null</span>;
+    }
+
+    <span class="cm">// Override toString() from Object (via Date)</span>
+    <span class="kw">public</span> <span class="cls">String</span> <span class="fn">toString</span>() {
+        <span class="kw">return</span> <span class="fn">printInfo</span>(<span class="kw">this</span>, format);
+    }
+
+    <span class="cm">// Override nextYear() — must return FormattedDate, not Date</span>
+    <span class="kw">public</span> <span class="cls">FormattedDate</span> <span class="fn">nextYear</span>() {
+        <span class="kw">return new</span> <span class="cls">FormattedDate</span>(<span class="fn">getMonth</span>(), <span class="fn">getDay</span>(), <span class="fn">getYear</span>() + <span class="num">1</span>, format);
+    }
+
+    <span class="cm">// Override equals — check parent first, then own fields</span>
+    <span class="kw">public boolean</span> <span class="fn">equals</span>(<span class="cls">Object</span> object) {
+        <span class="kw">return super</span>.<span class="fn">equals</span>(object) &amp;&amp; format == ((<span class="cls">FormattedDate</span>) object).format;
+    }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content pitfalls-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">⚠️</span>
+            <span class="section-title">Common Mistakes</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Accessing private parent fields directly</div>
+              <p>In <code>FormattedDate</code>, writing <code>this.month</code> fails because <code>month</code> is <code>private</code> in <code>Date</code>. The field is inherited, but the name is not accessible.</p>
+              <div class="tip-box">✅ Use getters: <code>getMonth()</code>, <code>getDay()</code>, <code>getYear()</code></div>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Not calling super() in child constructor</div>
+              <p>If you forget <code>super(month, day, year)</code>, Java calls the no-argument parent constructor. If none exists, it's a compile error. Even if it works, the parent's fields won't be initialized correctly.</p>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Thinking private means "not inherited"</div>
+              <p>Private fields <em>are</em> inherited — they exist in the object. They just can't be accessed by name from child code. Use getters/setters.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== POLYMORPHISM ==================== -->
+    <div id="page-polymorphism" class="page">
+      <div class="topic-header">
+        <div class="topic-tag">Topic 05</div>
+        <div class="topic-title">Polymorphism</div>
+        <div class="topic-desc">One method name, many behaviours. Java decides which version to call at runtime based on the actual object type — not the variable type.</div>
+      </div>
+      <div class="tab-content theory-content">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">💡</span>
+            <span class="section-title">Simple Explanation</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p><strong>Polymorphism</strong> means "many forms." The same method call can behave differently depending on which object is actually there at runtime.</p>
+            <div class="analogy-box">
+              <div class="label">🌍 Real-World Analogy</div>
+              <strong>The word "speak."</strong> If you tell a Dog to speak, it barks. If you tell a Cat to speak, it meows. If you tell a Person to speak, they talk. The command is the same — <em>speak()</em> — but the result depends on who you're talking to. That's polymorphism.
+            </div>
+            <p><strong>Late binding (dynamic binding)</strong>: Java waits until runtime to decide which method version to call. It's based on the <em>actual object type</em>, not the variable's declared type.</p>
+            <p><strong>Static binding</strong> (no late binding) applies to: <code>private</code> methods, <code>final</code> methods, and <code>static</code> methods.</p>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">☕</span>
+            <span class="section-title">Upcasting vs. Downcasting</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p><strong>Upcasting</strong> (safe, automatic): Assign a child object to a parent variable.</p>
+            <p><strong>Downcasting</strong> (risky, manual): Cast a parent variable back to a specific child type. May throw <code>ClassCastException</code> at runtime if wrong.</p>
+            <p>Always use <code>instanceof</code> before downcasting to be safe.</p>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content code-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">📝</span>
+            <span class="section-title">Polymorphism in Action (A, B, C hierarchy)</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="code-container">
+              <div class="code-header"><span class="code-label">Late binding demo from lectures</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="kw">class</span> <span class="cls">A</span> {
+    <span class="kw">public void</span> <span class="fn">printClassName</span>() { <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"A"</span>); }
+
+    <span class="cm">// static: NO late binding — resolved at compile time by variable type</span>
+    <span class="kw">public static void</span> <span class="fn">printStatic</span>() { <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"A static"</span>); }
+
+    <span class="cm">// final: NO late binding — cannot be overridden</span>
+    <span class="kw">public final void</span> <span class="fn">printFinal</span>() { <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"Always A"</span>); }
+
+    <span class="cm">// private: NOT inherited — not overridable</span>
+    <span class="kw">private void</span> <span class="fn">printPrivate</span>() { <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"A private"</span>); }
+
+    <span class="kw">public</span> <span class="cls">String</span> <span class="fn">toString</span>() { <span class="kw">return</span> <span class="str">"A"</span>; }
+}
+
+<span class="kw">class</span> <span class="cls">B</span> <span class="kw">extends</span> <span class="cls">A</span> {
+    <span class="kw">public void</span> <span class="fn">printClassName</span>() { <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"B"</span>); } <span class="cm">// overrides A</span>
+    <span class="kw">public static void</span> <span class="fn">printStatic</span>() { <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"B static"</span>); } <span class="cm">// hides A's static</span>
+    <span class="kw">public</span> <span class="cls">String</span> <span class="fn">toString</span>() { <span class="kw">return</span> <span class="str">"B"</span>; }
+}
+
+<span class="kw">class</span> <span class="cls">C</span> <span class="kw">extends</span> <span class="cls">B</span> {
+    <span class="kw">public void</span> <span class="fn">printClassName</span>() { <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"C"</span>); }
+    <span class="kw">public</span> <span class="cls">String</span> <span class="fn">toString</span>() { <span class="kw">return</span> <span class="str">"C"</span>; }
+}
+
+<span class="cm">// Key test: variable type vs actual object type</span>
+<span class="cls">A</span> b2 = <span class="kw">new</span> <span class="cls">B</span>();  <span class="cm">// variable type = A, actual object = B</span>
+b2.<span class="fn">printClassName</span>();  <span class="cm">// OUTPUT: "B" ← Late binding uses ACTUAL type</span>
+b2.<span class="fn">printStatic</span>();     <span class="cm">// OUTPUT: "A static" ← Static uses VARIABLE type</span>
+b2.<span class="fn">printFinal</span>();      <span class="cm">// OUTPUT: "Always A" ← final, cannot be overridden</span>
+<span class="cls">System</span>.out.<span class="fn">println</span>(b2); <span class="cm">// OUTPUT: "B" ← toString() uses late binding</span>
+
+<span class="cm">// Safe downcasting with instanceof</span>
+<span class="kw">if</span> (b2 <span class="kw">instanceof</span> <span class="cls">B</span>) {
+    <span class="cls">B</span> realB = (<span class="cls">B</span>) b2;  <span class="cm">// safe downcast</span>
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content pitfalls-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">⚠️</span>
+            <span class="section-title">Common Mistakes</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Thinking static methods use late binding</div>
+              <p>Static methods are NOT polymorphic. <code>A b2 = new B(); b2.printStatic()</code> calls <strong>A's</strong> version because the variable is of type A. This confuses many students.</p>
+              <div class="tip-box">✅ Rule: Static = resolved at compile time by <em>variable type</em>. Instance = resolved at runtime by <em>object type</em>.</div>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Unsafe downcasting without instanceof</div>
+              <p><code>B b = (B) someObject;</code> — if <code>someObject</code> is actually an <code>A</code>, this throws <code>ClassCastException</code> at runtime.</p>
+              <div class="tip-box">✅ Always check first: <code>if (someObject instanceof B) { B b = (B) someObject; }</code></div>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Calling child-specific methods on parent variable</div>
+              <p><code>A b2 = new B(); b2.printFromB();</code> — compile error! The variable type is A, so Java only knows about A's methods at compile time.</p>
+              <div class="tip-box">✅ Downcast first: <code>((B)b2).printFromB();</code></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ABSTRACTION ==================== -->
+    <div id="page-abstraction" class="page">
+      <div class="topic-header">
+        <div class="topic-tag">Topic 06</div>
+        <div class="topic-title">Abstract Classes</div>
+        <div class="topic-desc">Define the structure and some behaviour, leave the rest for subclasses to fill in. Cannot be instantiated directly.</div>
+      </div>
+      <div class="tab-content theory-content">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">💡</span>
+            <span class="section-title">Simple Explanation</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p>An <strong>abstract class</strong> is a class that says "I know I need a method called X, but I don't know how to implement it yet." Subclasses must provide the implementation.</p>
+            <div class="analogy-box">
+              <div class="label">🌍 Real-World Analogy</div>
+              <strong>An architectural blueprint for "a building."</strong> The blueprint says every building must have a foundation, walls, and a roof — but it doesn't decide <em>how</em> they look. A HouseBlueprint and OfficeBlueprint each provide the concrete details. You can't build "a building" from the abstract plan alone.
+            </div>
+            <ul>
+              <li>Declared with <code>abstract</code> keyword on the class</li>
+              <li>Can have <strong>abstract methods</strong> (no body, just signature)</li>
+              <li>Can also have fully implemented (concrete) methods</li>
+              <li>Cannot be instantiated: <code>new AbstractClass()</code> = compile error</li>
+              <li>Abstract methods cannot be <code>private</code>, <code>static</code>, or <code>final</code></li>
+              <li>A subclass must implement ALL abstract methods, or also be abstract</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content code-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">📝</span>
+            <span class="section-title">Abstract Class Example</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="code-container">
+              <div class="code-header"><span class="code-label">AbstractClass + ChildClass from lectures</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="cm">// Cannot instantiate this directly</span>
+<span class="kw">public abstract class</span> <span class="cls">AbstractClass</span> {
+
+    <span class="cm">// No body — subclass MUST implement this</span>
+    <span class="kw">public abstract void</span> <span class="fn">doSomething</span>();
+
+    <span class="cm">// Concrete method — inherited normally</span>
+    <span class="kw">public void</span> <span class="fn">commonBehavior</span>() {
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"Shared by all subclasses"</span>);
+    }
+}
+
+<span class="cm">// Concrete class — must implement doSomething()</span>
+<span class="kw">class</span> <span class="cls">ChildClass</span> <span class="kw">extends</span> <span class="cls">AbstractClass</span> {
+    <span class="kw">public void</span> <span class="fn">doSomething</span>() {
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"ChildClass does the thing!"</span>);
+    }
+}
+
+<span class="cm">// Usage:</span>
+<span class="cm">// AbstractClass a = new AbstractClass(); // COMPILE ERROR</span>
+<span class="cls">AbstractClass</span> a = <span class="kw">new</span> <span class="cls">ChildClass</span>(); <span class="cm">// OK — variable can be abstract type</span>
+a.<span class="fn">doSomething</span>();     <span class="cm">// "ChildClass does the thing!" (late binding)</span>
+a.<span class="fn">commonBehavior</span>(); <span class="cm">// "Shared by all subclasses"</span>
+
+<span class="cm">// Real example from Employee hierarchy:</span>
+<span class="kw">public abstract class</span> <span class="cls">Employee</span> {
+    <span class="kw">private</span> <span class="cls">String</span> name;
+
+    <span class="cm">// Every employee can get paid — but HOW depends on type</span>
+    <span class="kw">public abstract double</span> <span class="fn">getPay</span>();
+
+    <span class="cm">// This uses getPay() — works via polymorphism</span>
+    <span class="kw">public boolean</span> <span class="fn">samePay</span>(<span class="cls">Employee</span> other) {
+        <span class="kw">return this</span>.<span class="fn">getPay</span>() == other.<span class="fn">getPay</span>();
+    }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content pitfalls-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">⚠️</span>
+            <span class="section-title">Common Mistakes</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Trying to instantiate an abstract class</div>
+              <p><code>new AbstractClass()</code> is a compile error, even if the abstract class has a constructor. It can only be created via a subclass.</p>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Forgetting to implement all abstract methods</div>
+              <p>If a subclass doesn't implement ALL abstract methods, it must also be declared abstract — or the compiler will error.</p>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Declaring abstract methods as private, static, or final</div>
+              <p>These modifiers contradict the purpose of an abstract method (which must be overridden). Compile error.</p>
+              <div class="tip-box">✅ Abstract methods must be <code>public</code> or <code>protected</code>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== INTERFACES ==================== -->
+    <div id="page-interfaces" class="page">
+      <div class="topic-header">
+        <div class="topic-tag">Topic 07</div>
+        <div class="topic-title">Interfaces</div>
+        <div class="topic-desc">A contract that any class can sign. Defines what a class must be able to do — without saying how.</div>
+      </div>
+      <div class="tab-content theory-content">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">💡</span>
+            <span class="section-title">Simple Explanation</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p>An <strong>interface</strong> is like a contract. It lists methods that any implementing class MUST provide. Unlike abstract classes, a class can implement <em>multiple</em> interfaces.</p>
+            <div class="analogy-box">
+              <div class="label">🌍 Real-World Analogy</div>
+              <strong>USB standard.</strong> The USB interface says "any device that plugs in must accept power and transfer data." A keyboard implements it. A mouse implements it. A flash drive implements it. Each does it differently, but they all fulfill the contract.
+            </div>
+            <ul>
+              <li>Declared with <code>interface</code> keyword, implemented with <code>implements</code></li>
+              <li>All methods in an interface are implicitly <code>public abstract</code></li>
+              <li>All variables are implicitly <code>public static final</code></li>
+              <li>Java 8+: interfaces can have <code>default</code> methods (with body)</li>
+              <li>Java 8+: interfaces can have <code>static</code> methods</li>
+              <li>A class can implement multiple interfaces (unlike extending classes)</li>
+              <li>Interface is a <em>type</em> — you can have variables of interface type</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content code-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">📝</span>
+            <span class="section-title">Interface Example</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="code-container">
+              <div class="code-header"><span class="code-label">Interface + Implementation</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="cm">// Define the contract</span>
+<span class="kw">public interface</span> <span class="cls">Rotatable</span> {
+    <span class="cm">// Implicitly public abstract — no body!</span>
+    <span class="kw">void</span> <span class="fn">rotateBy90Degrees</span>();
+    <span class="kw">void</span> <span class="fn">rotateBy180Degrees</span>();
+}
+
+<span class="cm">// Implement multiple interfaces</span>
+<span class="kw">public class</span> <span class="cls">Rectangle</span> <span class="kw">implements</span> <span class="cls">Rotatable</span> {
+    <span class="kw">private int</span> width, height;
+
+    <span class="kw">public void</span> <span class="fn">rotateBy90Degrees</span>() {
+        <span class="kw">int</span> temp = width;
+        width = height;
+        height = temp;
+    }
+
+    <span class="kw">public void</span> <span class="fn">rotateBy180Degrees</span>() {
+        <span class="cm">// Width and height stay the same for 180°</span>
+    }
+}
+
+<span class="cm">// Interface as a type — polymorphism!</span>
+<span class="cls">Rotatable</span> r = <span class="kw">new</span> <span class="cls">Rectangle</span>(<span class="num">4</span>, <span class="num">6</span>);
+r.<span class="fn">rotateBy90Degrees</span>(); <span class="cm">// Late binding — calls Rectangle's version</span>
+
+<span class="cm">// Interface with constants (from lectures)</span>
+<span class="kw">public interface</span> <span class="cls">MonthNumbers</span> {
+    <span class="cm">// Implicitly public static final</span>
+    <span class="kw">int</span> JANUARY = <span class="num">1</span>, FEBRUARY = <span class="num">2</span>, MARCH = <span class="num">3</span>;
+    <span class="cm">// ... etc</span>
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content pitfalls-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">⚠️</span>
+            <span class="section-title">Common Mistakes</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Implementing an interface but forgetting a method</div>
+              <p>If you <code>implements</code> an interface, you MUST provide all its methods — or your class must be declared <code>abstract</code>.</p>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Two interfaces with conflicting constant names</div>
+              <p>If two interfaces both define <code>int ANSWER</code> with different values, implementing both causes a compile error.</p>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Confusing interface and abstract class</div>
+              <p>Abstract classes can have instance variables and method bodies. Interfaces (traditionally) cannot have instance variables and all methods are abstract by default. A class can only extend ONE class, but implement MANY interfaces.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CLONEABLE ==================== -->
+    <div id="page-cloneable" class="page">
+      <div class="topic-header">
+        <div class="topic-tag">Topic 08</div>
+        <div class="topic-title">Cloneable &amp; Comparable</div>
+        <div class="topic-desc">Two essential Java interfaces: one for making safe copies of objects, one for defining a natural ordering for sorting.</div>
+      </div>
+      <div class="tab-content theory-content">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">💡</span>
+            <span class="section-title">Comparable Interface</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p><code>Comparable&lt;T&gt;</code> gives your class a natural ordering. Implement it to make objects sortable with <code>Collections.sort()</code>.</p>
+            <p>One method to implement: <code>public int compareTo(T other)</code></p>
+            <ul>
+              <li>Returns <strong>negative</strong> if <code>this</code> comes before <code>other</code></li>
+              <li>Returns <strong>zero</strong> if they are equal</li>
+              <li>Returns <strong>positive</strong> if <code>this</code> comes after <code>other</code></li>
+            </ul>
+            <div class="analogy-box">
+              <div class="label">🌍 Real-World Analogy</div>
+              <strong>Alphabetical filing.</strong> When sorting files, "Apple" comes before "Banana". <code>compareTo</code> is like asking "which file comes first?" — negative = I come first, positive = you come first, zero = same position.
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">📋</span>
+            <span class="section-title">Cloneable Interface</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p><code>Cloneable</code> is a <strong>marker interface</strong> — it has no methods. It just signals to <code>Object.clone()</code> that copying is allowed.</p>
+            <p>The default <code>Object.clone()</code> does a <strong>shallow copy</strong> (bit-by-bit copy). This causes privacy leaks for fields that are reference types (objects, arrays).</p>
+            <p>You must override <code>clone()</code> to do a <strong>deep copy</strong>: call <code>super.clone()</code>, then manually copy any mutable object fields.</p>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content code-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">📝</span>
+            <span class="section-title">Date with Comparable &amp; Cloneable</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="code-container">
+              <div class="code-header"><span class="code-label">Date.java — March31 version from lectures</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="kw">public class</span> <span class="cls">Date</span> <span class="kw">implements</span> <span class="cls">Comparable</span>&lt;<span class="cls">Date</span>&gt;, <span class="cls">Cloneable</span> {
+
+    <span class="kw">private</span> <span class="cls">String</span> month;
+    <span class="kw">private</span> <span class="kw">int</span> day, year;
+
+    <span class="cm">// Clone: returns an independent copy of this Date</span>
+    <span class="kw">public</span> <span class="cls">Date</span> <span class="fn">clone</span>() {
+        <span class="kw">try</span> {
+            <span class="kw">return</span> (<span class="cls">Date</span>) <span class="kw">super</span>.<span class="fn">clone</span>(); <span class="cm">// Safe for primitive fields</span>
+        } <span class="kw">catch</span> (<span class="cls">CloneNotSupportedException</span> e) {
+            <span class="kw">return null</span>; <span class="cm">// Won't happen since we implement Cloneable</span>
+        }
+    }
+
+    <span class="cm">// compareTo: defines natural ordering (year → month → day)</span>
+    <span class="kw">public int</span> <span class="fn">compareTo</span>(<span class="cls">Date</span> that) {
+        <span class="kw">if</span> (<span class="kw">this</span>.year != that.year)
+            <span class="kw">return this</span>.year - that.year; <span class="cm">// Earlier year = smaller</span>
+
+        <span class="cm">// Same year: compare months by ordinal</span>
+        <span class="kw">int</span> m1 = <span class="cls">FormattedDate</span>.<span class="cls">Month</span>.<span class="fn">valueOf</span>(<span class="kw">this</span>.month.<span class="fn">toUpperCase</span>()).<span class="fn">ordinal</span>();
+        <span class="kw">int</span> m2 = <span class="cls">FormattedDate</span>.<span class="cls">Month</span>.<span class="fn">valueOf</span>(that.month.<span class="fn">toUpperCase</span>()).<span class="fn">ordinal</span>();
+        <span class="kw">if</span> (m1 != m2) <span class="kw">return</span> m1 - m2;
+
+        <span class="kw">return this</span>.day - that.day; <span class="cm">// Same year+month: compare day</span>
+    }
+    <span class="cm">// ... (rest of fields, constructors, getters — same as before)</span>
+}
+
+<span class="cm">// DateHolder: shows why deep copy matters</span>
+<span class="kw">class</span> <span class="cls">DateHolder</span> <span class="kw">implements</span> <span class="cls">Cloneable</span> {
+    <span class="kw">private int</span> n;
+    <span class="kw">private</span> <span class="cls">String</span> s;
+    <span class="kw">private</span> <span class="cls">Date</span> date; <span class="cm">// mutable object — needs deep copy!</span>
+
+    <span class="kw">public</span> <span class="cls">DateHolder</span>(<span class="kw">int</span> n, <span class="cls">String</span> s, <span class="cls">Date</span> d) {
+        <span class="kw">this</span>.n = n; <span class="kw">this</span>.s = s;
+        <span class="kw">this</span>.date = d.<span class="fn">clone</span>(); <span class="cm">// Defensive copy in constructor</span>
+    }
+
+    <span class="kw">public</span> <span class="cls">DateHolder</span> <span class="fn">clone</span>() {
+        <span class="kw">try</span> {
+            <span class="cls">DateHolder</span> copy = (<span class="cls">DateHolder</span>) <span class="kw">super</span>.<span class="fn">clone</span>(); <span class="cm">// shallow first</span>
+            copy.date = date.<span class="fn">clone</span>(); <span class="cm">// then deep copy the Date field</span>
+            <span class="kw">return</span> copy;
+        } <span class="kw">catch</span> (<span class="cls">CloneNotSupportedException</span> e) { <span class="kw">return null</span>; }
+    }
+}
+
+<span class="cm">// Sorting with Comparable:</span>
+<span class="cls">ArrayList</span>&lt;<span class="cls">FormattedDate</span>&gt; list = <span class="kw">new</span> <span class="cls">ArrayList</span>&lt;&gt;();
+<span class="cm">// ... add dates ...</span>
+<span class="cls">Collections</span>.<span class="fn">sort</span>(list); <span class="cm">// Uses compareTo() automatically</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content pitfalls-content" style="display:none">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">⚠️</span>
+            <span class="section-title">Common Mistakes</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Shallow copy of objects containing references</div>
+              <p><code>super.clone()</code> copies primitive fields correctly but copies references <em>as-is</em>. Two objects end up sharing the same inner object — a privacy leak.</p>
+              <div class="tip-box">✅ After <code>super.clone()</code>, clone each mutable reference field individually.</div>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ Implementing Cloneable but not overriding clone()</div>
+              <p>The <code>Cloneable</code> interface has no methods — so if you only implement it but don't override <code>clone()</code>, you get the protected Object clone() which may not be accessible or correct.</p>
+            </div>
+            <div class="pitfall">
+              <div class="pitfall-title">❌ compareTo returning wrong sign</div>
+              <p>If you want ascending order (smallest first), <code>compareTo</code> should return negative when <code>this</code> is smaller. Returning the wrong sign reverses your sort order.</p>
+              <div class="tip-box">✅ Test: if <code>a.compareTo(b) &lt; 0</code>, then <code>a</code> should come before <code>b</code> in sorted order.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CHEAT SHEET ==================== -->
+    <div id="page-cheatsheet" class="page">
+      <div class="topic-header">
+        <div class="topic-tag">Quick Reference</div>
+        <div class="topic-title">Exam Cheat Sheet</div>
+        <div class="topic-desc">Everything you need to remember — in one place. Study this the night before.</div>
+      </div>
+
+      <div class="cheat-grid">
+        <div class="cheat-card">
+          <div class="cheat-card-title">🔒 Access Modifiers</div>
+          <div class="cheat-item">private<span>Only inside the class</span></div>
+          <div class="cheat-item">(default)<span>Same package only</span></div>
+          <div class="cheat-item">protected<span>Package + subclasses</span></div>
+          <div class="cheat-item">public<span>Everyone everywhere</span></div>
+        </div>
+        <div class="cheat-card">
+          <div class="cheat-card-title">🧬 Inheritance Keywords</div>
+          <div class="cheat-item">extends<span>Inherit from a class</span></div>
+          <div class="cheat-item">implements<span>Fulfill an interface</span></div>
+          <div class="cheat-item">super(...)<span>Call parent constructor (first line!)</span></div>
+          <div class="cheat-item">super.method()<span>Call parent version of method</span></div>
+          <div class="cheat-item">this(...)<span>Call another constructor (first line!)</span></div>
+        </div>
+        <div class="cheat-card">
+          <div class="cheat-card-title">🎭 Binding Rules</div>
+          <div class="cheat-item">Instance methods<span>Late binding — actual object type</span></div>
+          <div class="cheat-item">static methods<span>Static binding — variable type</span></div>
+          <div class="cheat-item">final methods<span>Static binding — cannot override</span></div>
+          <div class="cheat-item">private methods<span>Static binding — not inherited</span></div>
+        </div>
+        <div class="cheat-card">
+          <div class="cheat-card-title">🌫️ Abstract Rules</div>
+          <div class="cheat-item">abstract class<span>Cannot be instantiated</span></div>
+          <div class="cheat-item">abstract method<span>No body — subclass must implement</span></div>
+          <div class="cheat-item">interface<span>All methods abstract + public by default</span></div>
+          <div class="cheat-item">Cloneable<span>Marker interface — enables clone()</span></div>
+        </div>
+        <div class="cheat-card">
+          <div class="cheat-card-title">📋 compareTo Contract</div>
+          <div class="cheat-item">negative return<span>this comes BEFORE other</span></div>
+          <div class="cheat-item">zero return<span>this EQUALS other</span></div>
+          <div class="cheat-item">positive return<span>this comes AFTER other</span></div>
+          <div class="cheat-item">Collections.sort()<span>Uses compareTo() automatically</span></div>
+        </div>
+        <div class="cheat-card">
+          <div class="cheat-card-title">🔢 Enum Quick Facts</div>
+          <div class="cheat-item">ordinal()<span>0-based position (JANUARY = 0!)</span></div>
+          <div class="cheat-item">valueOf("NAME")<span>Case-sensitive! Must be UPPERCASE</span></div>
+          <div class="cheat-item">values()<span>Returns array of all constants</span></div>
+          <div class="cheat-item">Enum constructor<span>Runs once per constant at class load</span></div>
+        </div>
+        <div class="cheat-card">
+          <div class="cheat-card-title">⚡ equals() Template</div>
+          <div class="cheat-item">1. if (this == obj) return true;<span>Same reference shortcut</span></div>
+          <div class="cheat-item">2. if (obj == null) return false;<span>Null safety check</span></div>
+          <div class="cheat-item">3. if (getClass() != obj.getClass()) return false;<span>Type check</span></div>
+          <div class="cheat-item">4. Cast and compare fields<span>Use .equals() for Strings!</span></div>
+        </div>
+        <div class="cheat-card">
+          <div class="cheat-card-title">📋 clone() Template</div>
+          <div class="cheat-item">implements Cloneable<span>Must declare this</span></div>
+          <div class="cheat-item">super.clone()<span>Call first in try-catch</span></div>
+          <div class="cheat-item">Deep copy refs<span>Clone each mutable field too</span></div>
+          <div class="cheat-item">Return own type<span>Covariant return type is fine</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px">
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span class="section-icon">🎯</span>
+            <span class="section-title">Top 10 Things to Know for Exams</span>
+            <span class="section-chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <ol class="step-list">
+              <li><strong>== vs .equals()</strong>: == compares memory addresses. Use .equals() for value comparison of objects (Strings, Dates, etc.)</li>
+              <li><strong>super() must be first</strong>: In any constructor, calling super() or this() must be the very first statement — no exceptions.</li>
+              <li><strong>private stays private</strong>: Even in subclasses, private fields can't be accessed by name. Use getters.</li>
+              <li><strong>Late binding = actual object type</strong>: When you call an instance method, Java looks at what the object actually IS — not what variable type holds it.</li>
+              <li><strong>Static = compile time</strong>: Static methods are decided at compile time based on the variable's declared type, not the actual object.</li>
+              <li><strong>instanceof before downcasting</strong>: Always check <code>if (obj instanceof ChildClass)</code> before casting to avoid ClassCastException.</li>
+              <li><strong>Abstract class ≠ interface</strong>: Abstract class can have fields + concrete methods. Interface (classically) cannot have instance variables.</li>
+              <li><strong>Enum ordinal is 0-based</strong>: JANUARY.ordinal() == 0. Add 1 to get the month number.</li>
+              <li><strong>Deep copy for mutable fields</strong>: When cloning, always clone any fields that are objects (otherwise two objects share the same inner object).</li>
+              <li><strong>compareTo contract</strong>: negative = comes before, zero = equal, positive = comes after. Wrong sign = wrong sort order.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .content -->
+</main>
+
+<script>
+  let currentTab = 'theory';
+
+  function showPage(id, navEl) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    const page = document.getElementById('page-' + id);
+    if (page) page.classList.add('active');
+    if (navEl) navEl.classList.add('active');
+
+    // Update progress bar
+    const items = document.querySelectorAll('.nav-item');
+    const active = document.querySelector('.nav-item.active');
+    const idx = Array.from(items).indexOf(active);
+    document.getElementById('progress').style.width = ((idx + 1) / items.length * 100) + '%';
+
+    // Apply current tab to new page
+    setTab(currentTab, document.querySelector('.tab-btn.active'));
+
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  }
+
+  function setTab(tab, btn) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const activePage = document.querySelector('.page.active');
+    if (!activePage) return;
+
+    activePage.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+
+    if (tab === 'theory') {
+      const el = activePage.querySelector('.theory-content');
+      if (el) el.style.display = 'block';
+    } else if (tab === 'code') {
+      const el = activePage.querySelector('.code-content');
+      if (el) el.style.display = 'block';
+    } else if (tab === 'pitfalls') {
+      const el = activePage.querySelector('.pitfalls-content');
+      if (el) el.style.display = 'block';
+    }
+  }
+
+  function toggleSection(header) {
+    const body = header.nextElementSibling;
+    if (body) {
+      const isHidden = body.classList.contains('hidden');
+      body.classList.toggle('hidden', !isHidden);
+      header.classList.toggle('collapsed', !isHidden);
+    }
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-container').querySelector('pre');
+    const text = pre ? pre.innerText : '';
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // Initialize first page
+  setTab('theory', document.querySelector('.tab-btn.active'));
+</script>
+</body>
+</html>
